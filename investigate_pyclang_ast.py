@@ -2,7 +2,7 @@ import clang.cindex
 import sys
 
 index = clang.cindex.Index.create()
-tu = index.parse('test_files/test2.c')
+tu = index.parse('test_files/test3.c')
 print(type(tu),":")
 print(dir(tu))
 print("\n\n")
@@ -34,18 +34,25 @@ def tree(children, level):
 	for cur in children:
 		if cur.kind == clang.cindex. CursorKind.ENUM_DECL:
 			print("\n\n")
-		print(">" * (level * 4), "NODE: obj=", cur, "type=", cur.type, "kind =", "n/a" if cur.kind is None else cur.kind, "spel =", cur.spelling, len(cur.spelling))
+		print(">" * (level * 4), "NODE: obj=", cur, "type=", cur.type, "kind =", "n/a" if cur.kind is None else cur.kind, "spel = '{}' (len={})".format(cur.spelling, len(cur.spelling)))
 		if cur.kind == clang.cindex.CursorKind.INTEGER_LITERAL:
 			print(" " * (level * 4), "  - tokens:", [a.spelling for a in cur.get_tokens()])
 		elif cur.kind == clang.cindex.CursorKind.BINARY_OPERATOR:
 			print(" " * (level * 4), "  - tokens:", [a.spelling for a in cur.get_tokens()])
+			try:
+				print(" " * (level * 4), "OPERATOR", cur.operator)
+			except:
+				# SIGH!!!
+				print("### ERROR ### SEALANG FAILED ### ")
+				raise
 		elif cur.kind == clang.cindex.CursorKind.VAR_DECL:
 			print(" " * (level * 4), "  - type:", cur.type, "=", cur.type.spelling, "| const?:", cur.type.is_const_qualified() , ", pod?:", cur.type.is_pod(), ", volatile?:", cur.type.is_volatile_qualified())
 		elif cur.kind == clang.cindex.CursorKind.TYPEDEF_DECL:
 			print(" " * (level * 4), "  - referenced", cur.referenced, cur.referenced.spelling)
 			print(" " * (level * 4), "  - spelling:", cur.spelling)
 			print(" " * (level * 4), "  - type.spelling:", cur.type.spelling)
-			print(" " * (level * 4), "  - typedef_name:", cur.type.get_typedef_name())
+			#vvv Did not work with sealang - more up to date libclang or sealang not up to date with pyclang??
+			#print(" " * (level * 4), "  - typedef_name:", cur.type.get_typedef_name())
 			print(" " * (level * 4), "  - underlying_typedef_type", cur.underlying_typedef_type.spelling)
 		elif cur.kind == clang.cindex.CursorKind.DECL_REF_EXPR:
 			print(" " * (level * 4), "  - type", cur.type)
