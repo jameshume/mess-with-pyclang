@@ -1,3 +1,5 @@
+#include "fake_include.h"
+
 typedef enum {
 	ANON_BUT_TYPEDEFED_1,
 	ANON_BUT_TYPEDEFED_2,
@@ -19,3 +21,7 @@ enum {
 };
 
 typedef enum bare_named_enum type_the_bare_enum_t;
+
+
+x_named_and_typedefed_t test_named_and_typedefed_through_typedef;
+enum named_and_typedefed test_named_and_typedefed_through_enum;

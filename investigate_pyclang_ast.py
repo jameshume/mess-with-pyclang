@@ -2,7 +2,7 @@ import clang.cindex
 import sys
 
 index = clang.cindex.Index.create()
-tu = index.parse('test_files/test3.c')
+tu = index.parse('test_files/test2.c')
 print(type(tu),":")
 print(dir(tu))
 print("\n\n")
@@ -31,46 +31,44 @@ prev_enum_decl = None
 
 def tree(children, level):
 	global prev_enum_decl
+
+	indent_str="|   " * level
+
 	for cur in children:
-		if cur.kind == clang.cindex. CursorKind.ENUM_DECL:
-			print("\n\n")
-		print(">" * (level * 4), "NODE: obj=", cur, "type=", cur.type, "kind =", "n/a" if cur.kind is None else cur.kind, "spel = '{}' (len={})".format(cur.spelling, len(cur.spelling)))
+		#print(" " * (level * 4), ">>> NODE: obj=", cur, "type=", cur.type, "kind =", "n/a" if cur.kind is None else cur.kind, "spel = '{}' (len={})".format(cur.spelling, len(cur.spelling)))
+		print("{}+-- NODE: ".format(indent_str), "n/a" if cur.kind is None else cur.kind, "spel = '{}' (len={})".format(cur.spelling, len(cur.spelling)))
 		if cur.kind == clang.cindex.CursorKind.INTEGER_LITERAL:
-			print(" " * (level * 4), "  - tokens:", [a.spelling for a in cur.get_tokens()])
+			#print(" " * (level * 4), "  - tokens:", [a.spelling for a in cur.get_tokens()])
+			print("{}|       : tokens:".format(indent_str), [a.spelling for a in cur.get_tokens()])
 		elif cur.kind == clang.cindex.CursorKind.BINARY_OPERATOR:
-			print(" " * (level * 4), "  - tokens:", [a.spelling for a in cur.get_tokens()])
-			try:
-				print(" " * (level * 4), "OPERATOR", cur.operator)
-			except:
-				# SIGH!!!
-				print("### ERROR ### SEALANG FAILED ### ")
-				raise
+			print("{}|       : tokens:".format(indent_str), [a.spelling for a in cur.get_tokens()])
+			# Damin it!!!! CCant get ops
 		elif cur.kind == clang.cindex.CursorKind.VAR_DECL:
-			print(" " * (level * 4), "  - type:", cur.type, "=", cur.type.spelling, "| const?:", cur.type.is_const_qualified() , ", pod?:", cur.type.is_pod(), ", volatile?:", cur.type.is_volatile_qualified())
+			print("{}|       : type:".format(indent_str), cur.type, "=", cur.type.spelling, "| const?:", cur.type.is_const_qualified() , ", pod?:", cur.type.is_pod(), ", volatile?:", cur.type.is_volatile_qualified())
 		elif cur.kind == clang.cindex.CursorKind.TYPEDEF_DECL:
-			print(" " * (level * 4), "  - referenced", cur.referenced, cur.referenced.spelling)
-			print(" " * (level * 4), "  - spelling:", cur.spelling)
-			print(" " * (level * 4), "  - type.spelling:", cur.type.spelling)
+			print("{}|       : referenced".format(indent_str), cur.referenced, cur.referenced.spelling)
+			print("{}|       : type.spelling:".format(indent_str), cur.type.spelling)
+			print("{}|       : spelling:".format(indent_str), cur.spelling)
 			#vvv Did not work with sealang - more up to date libclang or sealang not up to date with pyclang??
 			#print(" " * (level * 4), "  - typedef_name:", cur.type.get_typedef_name())
-			print(" " * (level * 4), "  - underlying_typedef_type", cur.underlying_typedef_type.spelling)
+			print("{}|       : underlying_typedef_type".format(indent_str), cur.underlying_typedef_type.spelling)
 		elif cur.kind == clang.cindex.CursorKind.DECL_REF_EXPR:
-			print(" " * (level * 4), "  - type", cur.type)
-			print(" " * (level * 4), "  - type", cur.type.spelling)
-			print(" " * (level * 4), "  - referenced type", cur.referenced.type.spelling)
+			print("{}|       : type".format(indent_str), cur.type)
+			print("{}|       : type".format(indent_str), cur.type.spelling)
+			print("{}|       : referenced type".format(indent_str), cur.referenced.type.spelling)
 		elif cur.kind == clang.cindex.CursorKind.ENUM_CONSTANT_DECL:
-			print(" " * (level * 4), "  - type", cur.type.spelling)
-			print(" " * (level * 4), "  - enum_value", cur.enum_value)
-			print(" " * (level * 4), "  - parents", cur.lexical_parent.type.spelling, cur.semantic_parent.type.spelling,  cur.semantic_parent.kind)
-			print(" " * (level * 4), "  - parents obj eq", prev_enum_decl == cur.lexical_parent, prev_enum_decl == cur.semantic_parent)
+			print("{}|       : type".format(indent_str), cur.type.spelling)
+			print("{}|       : enum_value".format(indent_str), cur.enum_value)
+			print("{}|       : parents".format(indent_str), cur.lexical_parent.type.spelling, cur.semantic_parent.type.spelling,  cur.semantic_parent.kind)
+			print("{}|       : parents obj eq".format(indent_str), prev_enum_decl == cur.lexical_parent, prev_enum_decl == cur.semantic_parent)
 		elif cur.kind == clang.cindex. CursorKind.ENUM_DECL:
 			prev_enum_decl = cur
-			print(" " * (level * 4), "  - referenced", cur.referenced, cur.referenced.spelling)
-			print(" " * (level * 4), "  - type name", cur.type.spelling)
-			print(" " * (level * 4), "  - type kind", cur.type.kind)
-			print(" " * (level * 4), "  - is_anonymous", cur.is_anonymous())
-			print(" " * (level * 4), "  - parents", cur.lexical_parent.spelling, cur.semantic_parent.spelling)
-			print(" " * (level * 4), "  - enum_type", cur.enum_type, cur.enum_type.spelling)
+			print("{}|       : referenced".format(indent_str), cur.referenced, cur.referenced.spelling)
+			print("{}|       : type name".format(indent_str), cur.type.spelling)
+			print("{}|       : type kind".format(indent_str), cur.type.kind)
+			print("{}|       : is_anonymous".format(indent_str), cur.is_anonymous())
+			print("{}|       : parents".format(indent_str), cur.lexical_parent.spelling, cur.semantic_parent.spelling)
+			print("{}|       : enum_type".format(indent_str), cur.enum_type, cur.enum_type.spelling)
 
 		tree(cur.get_children(), level + 1)
 
