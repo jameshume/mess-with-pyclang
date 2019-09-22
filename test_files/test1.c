@@ -42,7 +42,7 @@ int MainFunction(const int param1)
 
 	const int testArray[] = {1,2,3,4};
 
-	do_something(testEnum1, 101, 'f');
+	do_something_super(1, 2, 3, ((testEnum1 & 0xff) << 11));
 
 	UNDEF1(testEnum1, 2, "String literal test blah blah blah", UNDEF2(testEnum1,2,3) | UNDEF2(test_static_local,2,3));
 	UNDEF1(testEnum1, 2, "String literal test blah blah blah", UNDEF2(testEnum1,2,3));

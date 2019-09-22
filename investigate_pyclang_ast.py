@@ -2,7 +2,7 @@ import clang.cindex
 import sys
 
 index = clang.cindex.Index.create()
-tu = index.parse('test_files/test2.c')
+tu = index.parse('test_files/funcs.c')
 print(type(tu),":")
 print(dir(tu))
 print("\n\n")
@@ -35,16 +35,28 @@ def tree(children, level):
 	indent_str="|   " * level
 
 	for cur in children:
-		#print(" " * (level * 4), ">>> NODE: obj=", cur, "type=", cur.type, "kind =", "n/a" if cur.kind is None else cur.kind, "spel = '{}' (len={})".format(cur.spelling, len(cur.spelling)))
 		print("{}+-- NODE: ".format(indent_str), "n/a" if cur.kind is None else cur.kind, "spel = '{}' (len={})".format(cur.spelling, len(cur.spelling)))
 		if cur.kind == clang.cindex.CursorKind.INTEGER_LITERAL:
-			#print(" " * (level * 4), "  - tokens:", [a.spelling for a in cur.get_tokens()])
 			print("{}|       : tokens:".format(indent_str), [a.spelling for a in cur.get_tokens()])
+
+		elif cur.kind == clang.cindex.CursorKind.FUNCTION_DECL:
+			print("{}|       : cur.is_definition()".format(indent_str), cur.is_definition())
+			print("{}|       : cur.get_definition()".format(indent_str), cur.get_definition())
+			print("{}|       : cur.hash".format(indent_str), cur.hash)
+			print("{}|       : cur.get_definition().is_definition()".format(indent_str), cur.get_definition().is_definition())
+			print("{}|       : cur.linkage:".format(indent_str), cur.linkage)
+
+		elif cur.kind == clang.cindex.CursorKind.CALL_EXPR:
+			print("{}|       : cur.type.spelling:".format(indent_str), cur.type.spelling)
+			
+
 		elif cur.kind == clang.cindex.CursorKind.BINARY_OPERATOR:
 			print("{}|       : tokens:".format(indent_str), [a.spelling for a in cur.get_tokens()])
 			# Damin it!!!! CCant get ops
+
 		elif cur.kind == clang.cindex.CursorKind.VAR_DECL:
 			print("{}|       : type:".format(indent_str), cur.type, "=", cur.type.spelling, "| const?:", cur.type.is_const_qualified() , ", pod?:", cur.type.is_pod(), ", volatile?:", cur.type.is_volatile_qualified())
+
 		elif cur.kind == clang.cindex.CursorKind.TYPEDEF_DECL:
 			print("{}|       : referenced".format(indent_str), cur.referenced, cur.referenced.spelling)
 			print("{}|       : type.spelling:".format(indent_str), cur.type.spelling)
@@ -52,15 +64,18 @@ def tree(children, level):
 			#vvv Did not work with sealang - more up to date libclang or sealang not up to date with pyclang??
 			#print(" " * (level * 4), "  - typedef_name:", cur.type.get_typedef_name())
 			print("{}|       : underlying_typedef_type".format(indent_str), cur.underlying_typedef_type.spelling)
+
 		elif cur.kind == clang.cindex.CursorKind.DECL_REF_EXPR:
 			print("{}|       : type".format(indent_str), cur.type)
 			print("{}|       : type".format(indent_str), cur.type.spelling)
 			print("{}|       : referenced type".format(indent_str), cur.referenced.type.spelling)
+
 		elif cur.kind == clang.cindex.CursorKind.ENUM_CONSTANT_DECL:
 			print("{}|       : type".format(indent_str), cur.type.spelling)
 			print("{}|       : enum_value".format(indent_str), cur.enum_value)
 			print("{}|       : parents".format(indent_str), cur.lexical_parent.type.spelling, cur.semantic_parent.type.spelling,  cur.semantic_parent.kind)
 			print("{}|       : parents obj eq".format(indent_str), prev_enum_decl == cur.lexical_parent, prev_enum_decl == cur.semantic_parent)
+
 		elif cur.kind == clang.cindex. CursorKind.ENUM_DECL:
 			prev_enum_decl = cur
 			print("{}|       : referenced".format(indent_str), cur.referenced, cur.referenced.spelling)
@@ -69,6 +84,9 @@ def tree(children, level):
 			print("{}|       : is_anonymous".format(indent_str), cur.is_anonymous())
 			print("{}|       : parents".format(indent_str), cur.lexical_parent.spelling, cur.semantic_parent.spelling)
 			print("{}|       : enum_type".format(indent_str), cur.enum_type, cur.enum_type.spelling)
+
+		elif cur.kind == clang.cindex. CursorKind.UNARY_OPERATOR:
+			print("{}|       : cur.get_tokens():".format(indent_str), [a.spelling for a in cur.get_tokens()])
 
 		tree(cur.get_children(), level + 1)
 
